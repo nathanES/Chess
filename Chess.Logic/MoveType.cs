@@ -7,5 +7,5 @@ public enum MoveType
     CastleQueenSide,
     DoublePawn,
     EnPassant,
-    PanwnPromotion,
+    PawnPromotion,
 }

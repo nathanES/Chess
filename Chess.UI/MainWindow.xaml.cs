@@ -91,7 +91,32 @@ public partial class MainWindow : Window
         _selectedPos = null;
         HideHighlights();
         if (_moveCache.TryGetValue(pos, out Move? move))
-            HandleMove(move);
+        {
+            if (move.Type == MoveType.PawnPromotion)
+            {
+                HandlePromotion(move.FromPos, move.ToPos);
+            }
+            else
+            {
+                HandleMove(move);
+            }
+        }
+    }
+
+    private void HandlePromotion(Position fromPos, Position toPos)
+    {
+        _pieceImages[toPos.Row, toPos.Column]!.Source = Images.GetImage(_gameState.CurrentPlayer, PieceType.Pawn);
+        _pieceImages[fromPos.Row, fromPos.Column]!.Source = null;
+
+        var promMenu = new PromotionMenu(_gameState.CurrentPlayer);
+        MenuContainer.Content = promMenu;
+
+        promMenu.PieceSelected += type =>
+        {
+            MenuContainer.Content = null;
+            Move promMove = new PawnPromotion(fromPos, toPos, type);
+            HandleMove(promMove);
+        };
     }
 
     private void HandleMove(Move move)
