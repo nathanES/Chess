@@ -5,6 +5,6 @@ public enum EndReason
     Checkmate,
     Stalemate,
     FiftyMoveRule,
-    InsufficentMaterial,
+    InsufficientMaterial,
     ThreefoldRepetition,
 }

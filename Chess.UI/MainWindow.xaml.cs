@@ -17,7 +17,7 @@ public partial class MainWindow : Window
     private readonly Rectangle[,] _highlights = new Rectangle[8, 8];
     private readonly Dictionary<Position, Move> _moveCache = new();
 
-    private readonly GameState _gameState;
+    private GameState _gameState;
     private Position? _selectedPos = null;
 
     public MainWindow()
@@ -60,6 +60,9 @@ public partial class MainWindow : Window
 
     private void BoardGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (IsMenuOnScreen())
+            return;
+
         Point point = e.GetPosition(BoardGrid);
         Position pos = ToSquarePosition(point);
         if (_selectedPos == null)
@@ -96,6 +99,9 @@ public partial class MainWindow : Window
         _gameState.MakeMove(move);
         DrawBoard(_gameState.Board);
         SetCursor(_gameState.CurrentPlayer);
+
+        if (_gameState.IsGameOver())
+            ShowGameOver();
     }
 
     private Position ToSquarePosition(Point point)
@@ -138,5 +144,35 @@ public partial class MainWindow : Window
             Cursor = ChessCursors.WhiteCursor;
         else
             Cursor = ChessCursors.BlackCursor;
+    }
+
+    private bool IsMenuOnScreen() => MenuContainer.Content != null;
+
+    private void ShowGameOver()
+    {
+        var gameOverMenu = new GameOverMenu(_gameState);
+        MenuContainer.Content = gameOverMenu;
+
+        gameOverMenu.OptionSelected += option =>
+        {
+            if (option == Option.Restart)
+            {
+                MenuContainer.Content = null;
+                RestartGame();
+            }
+            else
+            {
+                Application.Current.Shutdown();
+            }
+        };
+    }
+
+    private void RestartGame()
+    {
+        HideHighlights();
+        _moveCache.Clear();
+        _gameState = new GameState(Board.Initial(), Player.White);
+        DrawBoard(_gameState.Board);
+        SetCursor(_gameState.CurrentPlayer);
     }
 }

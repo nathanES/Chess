@@ -9,23 +9,21 @@
         Icon="/Assets/icon.ico"
         WindowStartupLocation="CenterScreen"
         Background="Black">
-  <Viewbox>
-    <Grid x:Name="BoardGrid"
-      Width="600"
-      Height="600"
-      MouseDown="BoardGrid_MouseDown">
-      <Grid.Background>
-        <ImageBrush ImageSource="/Assets/Board.png"/>
-      </Grid.Background>
+    <Viewbox>
+        <Grid x:Name="BoardGrid"
+              Width="600"
+              Height="600"
+              MouseDown="BoardGrid_MouseDown">
 
-      <UniformGrid x:Name="HighlightGrid" Rows="8" Columns="8" >
-      
-      </UniformGrid>
-      <UniformGrid x:Name="PieceGrid"
-        Rows="8"
-        Columns="8"
-        RenderOptions.BitmapScalingMode="HighQuality">
-      </UniformGrid>
-    </Grid>
-  </Viewbox>
+            <Grid.Background>
+                <ImageBrush ImageSource="/Assets/Board.png"/>
+            </Grid.Background>
+
+            <UniformGrid x:Name="HighlightGrid" Rows="8" Columns="8" />
+
+            <UniformGrid x:Name="PieceGrid" Rows="8" Columns="8" RenderOptions.BitmapScalingMode="HighQuality"/>
+
+            <ContentControl x:Name="MenuContainer"/>
+        </Grid>
+    </Viewbox>
 </Window>
