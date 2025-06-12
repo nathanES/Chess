@@ -1,12 +1,30 @@
 ﻿namespace Chess.Logic;
+
 public class GameState
 {
-    public Board Board { get; }
-    public Player Player { get; private set; }
-
     public GameState(Board board, Player player)
     {
         Board = board;
-        Player = player;
+        CurrentPlayer = player;
+    }
+
+    public Board Board { get; }
+
+    public Player CurrentPlayer { get; private set; }
+
+    public IEnumerable<Move> LegalMovesForPiece(Position pos)
+    {
+        if (Board.IsEmpty(pos) || Board[pos]!.Player != CurrentPlayer)
+            return [];
+
+        Piece piece = Board[pos]!;
+        IEnumerable<Move> moveCandidates = piece.GetMoves(pos, Board);
+        return moveCandidates.Where(move => move.IsLegal(Board));
+    }
+
+    public void MakeMove(Move move)
+    {
+        move.Execute(Board);
+        CurrentPlayer = CurrentPlayer.Opponent();
     }
 }

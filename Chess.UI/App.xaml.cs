@@ -1,14 +1,11 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
-
-namespace Chess.UI
+﻿namespace Chess.UI
 {
+    using System.Windows;
+
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Interaction logic for App.xaml.
     /// </summary>
     public partial class App : Application
     {
     }
-
 }

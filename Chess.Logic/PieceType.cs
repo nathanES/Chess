@@ -7,5 +7,5 @@ public enum PieceType
     Knight,
     Rook,
     Queen,
-    King
+    King,
 }
