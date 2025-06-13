@@ -2,12 +2,16 @@
 
 public class GameState
 {
+    private readonly Dictionary<string, int> _stateHistory = new();
     private int _noCaptureOrPawnMove = 0;
+    private string _stateString;
 
     public GameState(Board board, Player player)
     {
         Board = board;
         CurrentPlayer = player;
+        _stateString = new StateString(CurrentPlayer, board).ToString();
+        _stateHistory[_stateString] = 1;
     }
 
     public Board Board { get; }
@@ -33,6 +37,7 @@ public class GameState
         if (isCapturingOrMovePawn)
         {
             _noCaptureOrPawnMove = 0;
+            _stateHistory.Clear();
         }
         else
         {
@@ -40,6 +45,7 @@ public class GameState
         }
 
         CurrentPlayer = CurrentPlayer.Opponent();
+        UpdateStateString();
         CheckForGameOver();
     }
 
@@ -72,6 +78,23 @@ public class GameState
         {
             Result = Result.Draw(EndReason.FiftyMoveRule);
         }
+        else if (ThreefoldRepetition())
+        {
+            Result = Result.Draw(EndReason.ThreefoldRepetition);
+        }
+    }
+
+    private void UpdateStateString()
+    {
+        _stateString = new StateString(CurrentPlayer, Board).ToString();
+        if (!_stateHistory.ContainsKey(_stateString))
+        {
+            _stateHistory[_stateString] = 1;
+        }
+        else
+        {
+            _stateHistory[_stateString]++;
+        }
     }
 
     private bool FiftyMoveRule()
@@ -79,4 +102,6 @@ public class GameState
         int fullMoves = _noCaptureOrPawnMove / 2;
         return fullMoves == 50;
     }
+
+    private bool ThreefoldRepetition() => _stateHistory[_stateString] == 3;
 }

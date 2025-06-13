@@ -1,4 +1,6 @@
-﻿namespace Chess.Logic;
+﻿using Chess.Logic.Moves;
+
+namespace Chess.Logic;
 public class Board
 {
     private readonly Piece?[,] _pieces = new Piece?[8, 8]; // I don't like this name
@@ -91,6 +93,40 @@ public class Board
             IsKingKnightVKing(counting) || IsKingBishopVKingBishop(counting);
     }
 
+    public bool CastleRightKingSide(Player player)
+    {
+        return player switch
+        {
+            Player.White => IsUnmovedKingAndRook(new Position(7, 4), new Position(7, 7)),
+            Player.Black => IsUnmovedKingAndRook(new Position(0, 4), new Position(0, 7)),
+            _ => false
+        };
+    }
+
+    public bool CastleRightQueenSide(Player player)
+    {
+        return player switch
+        {
+            Player.White => IsUnmovedKingAndRook(new Position(7, 4), new Position(7, 0)),
+            Player.Black => IsUnmovedKingAndRook(new Position(0, 4), new Position(0, 0)),
+            _ => false
+        };
+    }
+
+    public bool CanCaptureEnPassant(Player player)
+    {
+        Position? skipPos = GetPawnSkipPosition(player.Opponent());
+        if (skipPos == null)
+            return false;
+        Position[] pawnPositions = player switch
+        {
+            Player.White => [skipPos + Direction.SouthWest, skipPos + Direction.SouthEast],
+            Player.Black => [skipPos + Direction.NorthWest, skipPos + Direction.NorthEast],
+            _ => Array.Empty<Position>()
+        };
+        return HasPawnInPosition(player, pawnPositions, skipPos);
+    }
+
     private static bool IsKingVKing(Counting counting) => counting.TotalCount == 2;
 
     private static bool IsKingBishopVKing(Counting counting) => counting.TotalCount == 3 && (counting.White(PieceType.Bishop) == 1 || counting.Black(PieceType.Bishop) == 1);
@@ -110,6 +146,21 @@ public class Board
     }
 
     private Position FindPiece(Player color, PieceType type) => PiecePositionsFor(color).First(pos => this[pos]!.Type == type);
+
+    private bool HasPawnInPosition(Player player, Position[] pawnPositions, Position skipPos)
+    {
+        foreach (Position pos in pawnPositions.Where(IsInside))
+        {
+            Piece? piece = this[pos];
+            if (piece == null || piece.Player != player || piece.Type != PieceType.Pawn)
+                continue;
+            var move = new EnPassant(pos, skipPos);
+            if (move.IsLegal(this))
+                return true;
+        }
+
+        return false;
+    }
 
     private void AddStartPieces()
     {
@@ -136,5 +187,17 @@ public class Board
             this[1, i] = new Pawn(Player.Black);
             this[6, i] = new Pawn(Player.White);
         }
+    }
+
+    private bool IsUnmovedKingAndRook(Position kingPos, Position rookPos)
+    {
+        if (IsEmpty(kingPos) || IsEmpty(rookPos))
+            return false;
+
+        Piece king = this[kingPos]!;
+        Piece rook = this[rookPos]!;
+
+        return king.Type == PieceType.King && rook.Type == PieceType.Rook &&
+            !king.HasMoved && !rook.HasMoved;
     }
 }
