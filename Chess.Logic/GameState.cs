@@ -2,6 +2,8 @@
 
 public class GameState
 {
+    private int _noCaptureOrPawnMove = 0;
+
     public GameState(Board board, Player player)
     {
         Board = board;
@@ -27,7 +29,16 @@ public class GameState
     public void MakeMove(Move move)
     {
         Board.SetPawnSkipPosition(CurrentPlayer, null);
-        move.Execute(Board);
+        bool isCapturingOrMovePawn = move.Execute(Board);
+        if (isCapturingOrMovePawn)
+        {
+            _noCaptureOrPawnMove = 0;
+        }
+        else
+        {
+            _noCaptureOrPawnMove++;
+        }
+
         CurrentPlayer = CurrentPlayer.Opponent();
         CheckForGameOver();
     }
@@ -57,5 +68,15 @@ public class GameState
         {
             Result = Result.Draw(EndReason.InsufficientMaterial);
         }
+        else if (FiftyMoveRule())
+        {
+            Result = Result.Draw(EndReason.FiftyMoveRule);
+        }
+    }
+
+    private bool FiftyMoveRule()
+    {
+        int fullMoves = _noCaptureOrPawnMove / 2;
+        return fullMoves == 50;
     }
 }

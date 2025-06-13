@@ -14,14 +14,15 @@ public class NormalMove : Move
 
     public override Position ToPos { get; }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         Piece? piece = board[FromPos];
         if (piece == null)
             throw new Exception($"{nameof(piece)} is null while doing {nameof(Execute)} method");
-
+        bool capture = !board.IsEmpty(ToPos);
         board[ToPos] = piece;
         board[FromPos] = null;
         piece.HasMoved = true;
+        return capture || piece.Type == PieceType.Pawn;
     }
 }

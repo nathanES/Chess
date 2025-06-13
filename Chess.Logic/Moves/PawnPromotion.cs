@@ -17,7 +17,7 @@ public class PawnPromotion : Move
 
     public override Position ToPos { get; }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         Piece pawn = board[FromPos]!;
         board[FromPos] = null;
@@ -25,6 +25,7 @@ public class PawnPromotion : Move
         Piece promotionPiece = CreatePromotionPiece(pawn.Player);
         promotionPiece.HasMoved = true;
         board[ToPos] = promotionPiece;
+        return false;
     }
 
     private Piece CreatePromotionPiece(Player player)

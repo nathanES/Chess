@@ -37,10 +37,11 @@ internal class Castle : Move
 
     public override Position ToPos { get; }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         new NormalMove(FromPos, ToPos).Execute(board);
         new NormalMove(_rookFromPos, _rookToPos).Execute(board);
+        return false;
     }
 
     public override bool IsLegal(Board board)

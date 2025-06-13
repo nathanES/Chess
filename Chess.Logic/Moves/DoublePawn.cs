@@ -17,10 +17,11 @@ public class DoublePawn : Move
 
     public override Position ToPos { get; }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         Player player = board[FromPos]!.Player;
         board.SetPawnSkipPosition(player, _skippedPos);
         new NormalMove(FromPos, ToPos).Execute(board);
+        return true;
     }
 }
