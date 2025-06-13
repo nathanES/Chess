@@ -26,6 +26,7 @@ public class GameState
 
     public void MakeMove(Move move)
     {
+        Board.SetPawnSkipPosition(CurrentPlayer, null);
         move.Execute(Board);
         CurrentPlayer = CurrentPlayer.Opponent();
         CheckForGameOver();
@@ -45,12 +46,16 @@ public class GameState
 
     private void CheckForGameOver()
     {
-        if (!AllLegalMovesFor(CurrentPlayer).Any())
+        if (!AllLegalMovesFor(CurrentPlayer).Any()) // TODO : Maybe add an event when there is no legal Move
         {
             if (Board.IsInCheck(CurrentPlayer))
                 Result = Result.Win(CurrentPlayer.Opponent());
             else
                 Result = Result.Draw(EndReason.Stalemate);
+        }
+        else if (Board.IsInsufficientMaterial()) // TODO : Maybe not check that every play but when there is a capture or a promotion
+        {
+            Result = Result.Draw(EndReason.InsufficientMaterial);
         }
     }
 }

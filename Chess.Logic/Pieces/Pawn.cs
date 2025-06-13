@@ -1,4 +1,6 @@
-﻿namespace Chess.Logic;
+﻿using Chess.Logic.Moves;
+
+namespace Chess.Logic;
 
 public class Pawn : Piece
 {
@@ -68,7 +70,7 @@ public class Pawn : Piece
 
             Position twoMovesPos = oneMovePos + _forward;
             if (!HasMoved && CanMoveTo(twoMovesPos, board))
-                yield return new NormalMove(from, twoMovesPos);
+                yield return new DoublePawn(from, twoMovesPos);
         }
     }
 
@@ -77,7 +79,11 @@ public class Pawn : Piece
         foreach (Direction dir in new Direction[] { Direction.West, Direction.East })
         {
             Position to = from + _forward + dir;
-            if (CanCaptureAt(to, board))
+            if (to == board.GetPawnSkipPosition(Player.Opponent()))
+            {
+                yield return new EnPassant(from, to);
+            }
+            else if (CanCaptureAt(to, board))
             {
                 if (to.Row == 0 || to.Row == 7)
                 {

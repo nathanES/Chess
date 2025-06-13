@@ -2,6 +2,11 @@
 public class Board
 {
     private readonly Piece?[,] _pieces = new Piece?[8, 8]; // I don't like this name
+    private readonly Dictionary<Player, Position?> _pawnSkipPositions = new()
+    {
+        { Player.White, null },
+        { Player.Black, null },
+    };
 
     public Piece? this[int row, int col]
     {
@@ -23,6 +28,10 @@ public class Board
     }
 
     public static bool IsInside(Position pos) => pos.Row >= 0 && pos.Row < 8 && pos.Column >= 0 && pos.Column < 8;
+
+    public Position? GetPawnSkipPosition(Player player) => _pawnSkipPositions[player];
+
+    public void SetPawnSkipPosition(Player player, Position? pos) => _pawnSkipPositions[player] = pos;
 
     public bool IsEmpty(Position pos) => this[pos] == null;
 
@@ -61,6 +70,46 @@ public class Board
 
         return copy;
     }
+
+    public Counting CountPieces()
+    {
+        var counting = new Counting();
+        foreach (Position pos in PiecePositions())
+        {
+            Piece piece = this[pos]!;
+
+            counting.Increment(piece.Player, piece.Type);
+        }
+
+        return counting;
+    }
+
+    public bool IsInsufficientMaterial()
+    {
+        Counting counting = CountPieces();
+        return IsKingVKing(counting) || IsKingBishopVKing(counting) ||
+            IsKingKnightVKing(counting) || IsKingBishopVKingBishop(counting);
+    }
+
+    private static bool IsKingVKing(Counting counting) => counting.TotalCount == 2;
+
+    private static bool IsKingBishopVKing(Counting counting) => counting.TotalCount == 3 && (counting.White(PieceType.Bishop) == 1 || counting.Black(PieceType.Bishop) == 1);
+
+    private static bool IsKingKnightVKing(Counting counting) => counting.TotalCount == 3 && (counting.White(PieceType.Knight) == 1 || counting.Black(PieceType.Knight) == 1);
+
+    private bool IsKingBishopVKingBishop(Counting counting)
+    {
+        if (counting.TotalCount != 4)
+            return false;
+        if (counting.White(PieceType.Bishop) != 1 || counting.Black(PieceType.Bishop) != 1)
+            return false;
+
+        Position wBishopPos = FindPiece(Player.White, PieceType.Bishop);
+        Position bBishopPos = FindPiece(Player.Black, PieceType.Bishop);
+        return wBishopPos.SquareColor() == bBishopPos.SquareColor();
+    }
+
+    private Position FindPiece(Player color, PieceType type) => PiecePositionsFor(color).First(pos => this[pos]!.Type == type);
 
     private void AddStartPieces()
     {

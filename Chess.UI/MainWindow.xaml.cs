@@ -194,10 +194,31 @@ public partial class MainWindow : Window
 
     private void RestartGame()
     {
+        _selectedPos = null;
         HideHighlights();
         _moveCache.Clear();
         _gameState = new GameState(Board.Initial(), Player.White);
         DrawBoard(_gameState.Board);
         SetCursor(_gameState.CurrentPlayer);
+    }
+
+    private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (!IsMenuOnScreen() && e.Key == System.Windows.Input.Key.Escape)
+            ShowPauseMenu();
+    }
+
+    private void ShowPauseMenu()
+    {
+        var pauseMenu = new PauseMenu();
+        MenuContainer.Content = pauseMenu;
+        pauseMenu.OptionSelected += option =>
+        {
+            MenuContainer.Content = null;
+            if (option == Option.Restart)
+            {
+                RestartGame();
+            }
+        };
     }
 }
